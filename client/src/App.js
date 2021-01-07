@@ -1,6 +1,6 @@
 import React from "react";
 import { MuiThemeProvider } from "@material-ui/core";
-import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
@@ -28,17 +28,16 @@ let theme = createMuiTheme({
     useNextVariants: true,
     button: {
       textTransform: 'none'
-    }
-  },
-  underline: {
-    color: 'red',
-    '&:before': {
-      border: '2px solid red'
+    },
+    h4: {
+      fontSize: 26,
+    },
+    subtitle1: {
+      fontSize: 19
     }
   }
 });
 
-theme = responsiveFontSizes(theme);
 
 function App() {
   const [loggedIn, setLoggedIn] = React.useState(true)
@@ -51,7 +50,6 @@ function App() {
         </Route>
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
-
       </BrowserRouter>
     </MuiThemeProvider>
   );
