@@ -5,8 +5,8 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon ./bin/www",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "debug": "nodemon  --inspect ./bin/www",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --exit --timeout 30000"
   },
@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "http-errors": "~1.8.0",
+    "mongoose": "^5.11.10",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.6"
   },
