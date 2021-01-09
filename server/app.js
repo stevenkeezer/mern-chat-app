@@ -1,12 +1,11 @@
-import express from "express";
-import dotenv from "dotenv";
-import connectDB from "./config/db.js";
-import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
-import { join } from "path";
-import cors from "cors"
-import morgan from "morgan";
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+const path = require("path");
+const cors = require("cors")
 
-import userRoutes from "./routes/userRoutes.js"
+const userRoutes = require("./routes/userRoutes")
 
 dotenv.config();
 
@@ -14,12 +13,14 @@ connectDB();
 
 const app = express();
 
+// const __dirname = path.resolve();
+// app.use(express.static(path.join(__dirname, "public")))
+
 app.use(cors());
 
 app.use(express.json())
 
 app.use('/api/users', userRoutes)
-
 
 app.use(notFound)
 app.use(errorHandler)

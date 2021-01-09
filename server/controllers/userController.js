@@ -1,7 +1,7 @@
-import asyncHandler from "express-async-handler"
-import User from "../models/userModel.js"
-import generateToken from "../utils/generateToken.js"
-import validateRegisterInput from "../validation/register.js";
+const asyncHandler = require("express-async-handler")
+const User = require("../models/userModel")
+const generateToken = require("../utils/generateToken")
+const validateRegisterInput = require("../validation/register")
 
 
 // @desc Auth user & get token
@@ -70,7 +70,4 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 
-export {
-    authUser,
-    registerUser
-}
+module.exports = { authUser, registerUser }
