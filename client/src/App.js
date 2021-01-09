@@ -2,8 +2,12 @@ import React from "react";
 import { MuiThemeProvider } from "@material-ui/core";
 import { createMuiTheme } from '@material-ui/core/styles';
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
+import { SnackbarProvider } from 'notistack';
+
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
+import Chat from "./pages/Chat"
+
 
 import "./App.css";
 
@@ -44,13 +48,17 @@ function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Route exact path="/">
-          {loggedIn ? <Redirect to="/signup" /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/login" component={Login} />
-        <Route path="/signup" component={Signup} />
-      </BrowserRouter>
+      <SnackbarProvider maxSnack={3} autoHideDuration={3000}>
+        <BrowserRouter>
+          <Route exact path="/">
+            {loggedIn ? <Redirect to="/signup" /> : <Redirect to="/login" />}
+          </Route>
+          <Route path="/signup" component={Signup} />
+          <Route path="/login" component={Login} />
+          <Route path="/chat" component={Chat} />
+        </BrowserRouter>
+      </SnackbarProvider>
+
     </MuiThemeProvider>
   );
 }

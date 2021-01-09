@@ -1,17 +1,15 @@
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
 import Authorization from '../layout/Authorization';
+import { useLogin } from '../services/authenticationService';
 
 const useStyles = makeStyles((theme) => ({
 	welcome: {
@@ -81,24 +79,15 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-// Login middleware placeholder
-function useLogin() {
-	const login = (email, password) => {
-		console.log(email, password);
-	};
-	return login;
-}
-
 export default function Login() {
 	const classes = useStyles();
-	const [ open, setOpen ] = React.useState(true);
-
+	const history = useHistory();
 	const login = useLogin();
 
-	const handleClose = (event, reason) => {
-		if (reason === 'clickaway') return;
-		setOpen(false);
-	};
+	React.useEffect(() => {
+		const userInfo = localStorage.getItem('currentUser');
+		if (userInfo) history.push('/chat');
+	}, []);
 
 	return (
 		<Authorization>
@@ -136,8 +125,7 @@ export default function Login() {
 							setStatus();
 							login(email, password).then(
 								() => {
-									// useHistory push to chat
-									console.log(email, password);
+									history.push('/chat');
 									return;
 								},
 								(error) => {
@@ -214,23 +202,6 @@ export default function Login() {
 				</Box>
 				<Box p={1} alignSelf="center" />
 			</Box>
-			<Snackbar
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center'
-				}}
-				open={open}
-				autoHideDuration={6000}
-				onClose={handleClose}
-				message="Login failed"
-				action={
-					<React.Fragment>
-						<IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
-							<CloseIcon fontSize="small" />
-						</IconButton>
-					</React.Fragment>
-				}
-			/>
 		</Authorization>
 	);
 }
