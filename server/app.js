@@ -18,10 +18,10 @@ app.use(cors());
 
 app.use(express.json())
 
-app.use('/api/users', userRoutes)
+app.use('/api/users/register', userRoutes)
+
 
 app.use(notFound)
-
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000;

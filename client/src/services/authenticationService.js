@@ -58,7 +58,7 @@ export function useRegister() {
         };
 
         return fetch(
-            `${process.env.REACT_APP_API_URL}/api/users/`,
+            `${process.env.REACT_APP_API_URL}/api/users/register`,
             requestOptions
         )
             .then(handleResponse)
