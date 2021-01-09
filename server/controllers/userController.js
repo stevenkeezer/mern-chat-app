@@ -26,7 +26,7 @@ const authUser = asyncHandler(async (req, res) => {
 })
 
 // @desc   Regist a new user
-// @route   POST /api/users
+// @route   POST /api/users/register
 // @access   Public
 const registerUser = asyncHandler(async (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body)
