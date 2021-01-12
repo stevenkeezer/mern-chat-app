@@ -1,20 +1,15 @@
-import React from 'react';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
-import Hidden from '@material-ui/core/Hidden';
-import Snackbar from '@material-ui/core/Snackbar';
-import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import { Formik } from 'formik';
+import React from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import * as Yup from 'yup';
 import Authorization from '../layout/Authorization';
+import { useRegister } from '../services/authenticationService';
 
 const useStyles = makeStyles((theme) => ({
 	welcome: {
@@ -80,23 +75,16 @@ const useStyles = makeStyles((theme) => ({
 	link: { textDecoration: 'none', display: 'flex', flexWrap: 'nowrap' }
 }));
 
-function useRegister() {
-	const register = (username, email, password) => {
-		console.log(username, email, password);
-	};
-	return register;
-}
-
 export default function Register() {
 	const classes = useStyles();
-	const [ open, setOpen ] = React.useState(true);
 
+	const history = useHistory();
 	const register = useRegister();
 
-	const handleClose = (event, reason) => {
-		if (reason === 'clickaway') return;
-		setOpen(false);
-	};
+	React.useEffect(() => {
+		const userInfo = localStorage.getItem('currentUser');
+		if (userInfo) history.push('/chat');
+	}, []);
 
 	return (
 		<Authorization>
@@ -120,6 +108,7 @@ export default function Register() {
 					</Grid>
 					<Formik
 						initialValues={{
+							username: '',
 							email: '',
 							password: ''
 						}}
@@ -133,13 +122,13 @@ export default function Register() {
 						})}
 						onSubmit={({ username, email, password }, { setStatus, setSubmitting }) => {
 							setStatus();
+							username = username.toLowerCase();
 							register(username, email, password).then(
 								() => {
-									// useHistory push to chat
-									console.log(email, password);
-									return;
+									history.push('/chat');
 								},
 								(error) => {
+									console.log('errrer', error);
 									setSubmitting(false);
 									setStatus(error);
 								}
@@ -231,23 +220,6 @@ export default function Register() {
 				</Box>
 				<Box p={1} alignSelf="center" />
 			</Box>
-			<Snackbar
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center'
-				}}
-				open={open}
-				autoHideDuration={6000}
-				onClose={handleClose}
-				message="Email already exists"
-				action={
-					<React.Fragment>
-						<IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
-							<CloseIcon fontSize="small" />
-						</IconButton>
-					</React.Fragment>
-				}
-			/>
 		</Authorization>
 	);
 }
