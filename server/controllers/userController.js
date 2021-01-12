@@ -15,8 +15,6 @@ const authUser = asyncHandler(async (req, res) => {
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user.id,
-            username: user.username,
-            email: user.email,
             token: generateToken(user._id)
         })
     } else {
@@ -48,7 +46,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error("Email already exists");
     }
 
-
     const user = await User.create({
         username,
         email,
@@ -58,8 +55,6 @@ const registerUser = asyncHandler(async (req, res) => {
     if (user) {
         res.status(201).json({
             _id: user._id,
-            username: user.username,
-            email: user.email,
             token: generateToken(user._id),
         });
     } else {

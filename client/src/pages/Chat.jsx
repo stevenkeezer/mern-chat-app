@@ -4,13 +4,7 @@ import { useHistory } from 'react-router-dom';
 export default function Chat() {
 	const history = useHistory();
 
-	React.useEffect(
-		() => {
-			const userInfo = localStorage.getItem('currentUser');
-			if (!userInfo) history.push('/signup');
-		},
-		[ history ]
-	);
+	React.useEffect(() => {}, [ history ]);
 
 	return <div>CHAT</div>;
 }
