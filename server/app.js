@@ -15,15 +15,22 @@ const app = express();
 // Port that the webserver listens to
 const PORT = process.env.PORT || 5000;
 
-app.listen(
+const server = app.listen(
     PORT,
     console.log(
         `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
     )
 );
 
+const io = require("socket.io")(server);
 
 app.use(express.json())
+
+// Assign socket object to every request
+app.use(function (req, res, next) {
+    req.io = io;
+    next();
+});
 
 app.use('/api/users', userRoutes)
 

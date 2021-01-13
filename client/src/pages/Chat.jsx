@@ -1,10 +1,23 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import Users from '../components/Users';
+import { authenticationService } from '../services/authenticationService';
 
 export default function Chat() {
 	const history = useHistory();
 
-	React.useEffect(() => {}, [ history ]);
+	React.useEffect(
+		() => {
+			if (!authenticationService.currentUserValue) {
+				history.push('/signup');
+			}
+		},
+		[ history ]
+	);
 
-	return <div>CHAT</div>;
+	return (
+		<div>
+			<Users />
+		</div>
+	);
 }

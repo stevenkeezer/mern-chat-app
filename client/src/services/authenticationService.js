@@ -8,7 +8,6 @@ const currentUserSubject = new BehaviorSubject(
 );
 
 export const authenticationService = {
-    logout,
     currentUser: currentUserSubject.asObservable(),
     get currentUserValue() {
         return currentUserSubject.value;
@@ -85,8 +84,30 @@ export function useRegister() {
 }
 
 
-function logout() {
-    localStorage.removeItem('currentUser');
-    currentUserSubject.next(null);
-}
+export function useLogout() {
+    const { enqueueSnackbar } = useSnackbar();
 
+    const logout = (currentUserId) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentUserId }),
+        };
+
+        return fetch(
+            `/api/users/logout`,
+            requestOptions
+        )
+            .then(user => {
+                localStorage.removeItem('currentUser');
+                currentUserSubject.next(user);
+                return
+            })
+            .catch(function () {
+                enqueueSnackbar('Failed to Logout', {
+                    variant: 'warning',
+                });
+            });
+    }
+    return logout
+}
