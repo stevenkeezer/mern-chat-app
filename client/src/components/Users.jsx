@@ -37,7 +37,7 @@ const Users = (props) => {
 	);
 
 	useEffect(() => {
-		const socket = socketIOClient('http://localhost:5000', {
+		const socket = socketIOClient(process.env.REACT_APP_API_URL, {
 			transports: [ 'websocket', 'polling', 'flashsocket' ]
 		});
 		socket.on('onlineUsers', (data) => {
