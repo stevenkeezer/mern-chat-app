@@ -1,19 +1,45 @@
 import { BehaviorSubject } from 'rxjs';
 import { useSnackbar } from 'notistack';
-
+import authHeader from '../utilities/auth-header';
 import useHandleResponse from '../utilities/handleResponse';
+
 
 const currentUserSubject = new BehaviorSubject(
     JSON.parse(localStorage.getItem('currentUser'))
 );
 
 export const authenticationService = {
-    logout,
     currentUser: currentUserSubject.asObservable(),
     get currentUserValue() {
         return currentUserSubject.value;
     },
 };
+
+export function useVerify() {
+    const { enqueueSnackbar } = useSnackbar();
+
+    const verifyUser = () => {
+        const requestOptions = {
+            method: 'POST',
+            headers: authHeader(),
+        };
+
+        return fetch(
+            `/api/users/authorized`,
+            requestOptions
+        )
+            .then(user => {
+                return user
+            })
+            .catch(function () {
+                enqueueSnackbar('Failed to verify token', {
+                    variant: 'warning',
+                });
+            });
+    }
+    return verifyUser
+}
+
 
 export function useLogin() {
     const { enqueueSnackbar } = useSnackbar();
@@ -58,7 +84,7 @@ export function useRegister() {
         };
 
         return fetch(
-            `/api/users/register`,
+            `/api/users/`,
             requestOptions
         )
             .then(handleResponse)
@@ -85,8 +111,30 @@ export function useRegister() {
 }
 
 
-function logout() {
-    localStorage.removeItem('currentUser');
-    currentUserSubject.next(null);
-}
+export function useLogout() {
+    const { enqueueSnackbar } = useSnackbar();
 
+    const logout = (currentUserId) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentUserId }),
+        };
+
+        return fetch(
+            `/api/users/logout`,
+            requestOptions
+        )
+            .then(user => {
+                localStorage.removeItem('currentUser');
+                currentUserSubject.next(user);
+                return
+            })
+            .catch(function () {
+                enqueueSnackbar('Failed to Logout', {
+                    variant: 'warning',
+                });
+            });
+    }
+    return logout
+}

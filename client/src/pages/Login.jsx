@@ -84,11 +84,6 @@ export default function Login() {
 	const history = useHistory();
 	const login = useLogin();
 
-	React.useEffect(() => {
-		const userInfo = localStorage.getItem('currentUser');
-		if (userInfo) history.push('/chat');
-	}, []);
-
 	return (
 		<Authorization>
 			<Box className={classes.buttonHeader}>
