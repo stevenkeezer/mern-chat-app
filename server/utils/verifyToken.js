@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
 
 const verifyToken = (token) => {
-    return jwt.verify(token, process.env.JWT_SECRET)
+    let newToken = token.split(" ")[1];
+    return jwt.verify(newToken, process.env.JWT_SECRET)
 }
 
 module.exports = verifyToken

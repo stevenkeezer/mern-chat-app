@@ -12,7 +12,7 @@ export default function Chat() {
 			const user = JSON.parse(localStorage.getItem('currentUser'));
 			async function verifiedToken() {
 				if (user) {
-					const verified = await verifyUser(user.token);
+					const verified = await verifyUser();
 
 					if (verified.ok === false) {
 						return history.push('/signup');

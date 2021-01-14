@@ -11,8 +11,7 @@ const onlineUsers = {};
 // @route POST /api/users/authorization
 // @acess Public
 const verifyAuthorization = asyncHandler(async (req, res) => {
-    const { token } = req.body
-    const verified = verifyToken(token)
+    const verified = verifyToken(req.headers.authorization)
 
     onlineUsers[verified.id] = true
     req.io.sockets.emit("onlineUsers", onlineUsers);
@@ -59,7 +58,7 @@ const authUser = asyncHandler(async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
         res.json({
-            token: generateToken(user._id)
+            token: "Bearer " + generateToken(user._id)
         })
     } else {
         res.status(401)
@@ -101,7 +100,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         onlineUsers[user.id] = true
         res.status(201).json({
-            token: generateToken(user._id),
+            token: "Bearer " + generateToken(user._id),
         });
     } else {
         res.status(400);

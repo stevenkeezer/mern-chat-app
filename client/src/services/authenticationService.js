@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 import { useSnackbar } from 'notistack';
-
+import authHeader from '../utilities/auth-header';
 import useHandleResponse from '../utilities/handleResponse';
 
 
@@ -18,11 +18,10 @@ export const authenticationService = {
 export function useVerify() {
     const { enqueueSnackbar } = useSnackbar();
 
-    const verifyUser = (token) => {
+    const verifyUser = () => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
+            headers: authHeader(),
         };
 
         return fetch(
