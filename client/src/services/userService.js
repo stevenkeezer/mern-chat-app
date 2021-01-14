@@ -12,7 +12,7 @@ export function useGetUsers() {
 
     const getUsers = () => {
         return fetch(
-            `/api/users/userlist`,
+            `/api/users`,
             requestOptions
         )
             .then(handleResponse)

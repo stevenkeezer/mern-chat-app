@@ -1,44 +1,52 @@
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+
 const asyncHandler = require("express-async-handler")
 const User = require("../models/userModel")
 const generateToken = require("../utils/generateToken")
 const validateRegisterInput = require("../validation/register")
+const verifyToken = require("../utils/verifyToken")
 
 const onlineUsers = {};
+
+// @desc determine is token is valid
+// @route POST /api/users/authorization
+// @acess Public
+const verifyAuthorization = asyncHandler(async (req, res) => {
+    const { token } = req.body
+    const verified = verifyToken(token)
+
+    onlineUsers[verified.id] = true
+    req.io.sockets.emit("onlineUsers", onlineUsers);
+
+    if (verified) {
+        res.json({
+            verified: true
+        })
+    }
+})
 
 // @desc get list of users
 // @route POST /api/users/userlist
 // @acess Private
 const getUserList = asyncHandler(async (req, res) => {
-    try {
-        let jwtUser = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
-        let id = mongoose.Types.ObjectId(jwtUser.id);
+    const id = req.user._id
 
-        User.aggregate()
-            .match({ _id: { $not: { $eq: id } } })
-            .project({
-                password: 0,
-                __v: 0,
-                date: 0,
-            })
-            .exec((err, users) => {
-                if (err) {
-                    console.log(err);
-                    res.setHeader("Content-Type", "application/json");
-                    res.end(JSON.stringify({ message: "Failure" }));
-                    res.sendStatus(500);
-                } else {
-                    res.send(users)
-                    req.io.sockets.emit("onlineUsers", onlineUsers);
-                }
-            });
-    } catch (err) {
-        console.log(err);
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ message: "Unauthorized" }));
-        res.sendStatus(401);
-    }
+    User.aggregate()
+        .match({ _id: { $not: { $eq: id } } })
+        .project({
+            password: 0,
+            __v: 0,
+            date: 0,
+        })
+        .exec((err, users) => {
+            if (err) {
+                console.log(err);
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ message: "Failure" }));
+                res.sendStatus(500);
+            } else {
+                res.send(users)
+            }
+        });
 })
 
 // @desc Auth user & get token
@@ -50,8 +58,6 @@ const authUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email })
 
     if (user && (await user.matchPassword(password))) {
-        onlineUsers[user.id] = true
-
         res.json({
             _id: user.id,
             token: generateToken(user._id)
@@ -92,7 +98,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (user) {
-        req.io.sockets.emit("users", user.username);
+        req.io.sockets.emit("newUser", user);
 
         onlineUsers[user.id] = true
         res.status(201).json({
@@ -110,9 +116,9 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access   Public
 const logout = asyncHandler(async (req, res) => {
     const { currentUserId } = req.body
-    onlineUsers[currentUserId] = false
+    delete onlineUsers[currentUserId]
     req.io.sockets.emit("onlineUsers", onlineUsers);
     res.json({})
 })
 
-module.exports = { authUser, registerUser, getUserList, logout }
+module.exports = { authUser, registerUser, verifyAuthorization, getUserList, logout }

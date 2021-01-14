@@ -21,20 +21,15 @@ const useStyles = makeStyles((theme) => ({
 const Users = (props) => {
 	const classes = useStyles();
 	const history = useHistory();
-	const [ currentUserId ] = useState(authenticationService.currentUserValue._id);
 	const [ users, setUsers ] = useState([]);
-	const [ newUser, setNewUser ] = useState(null);
 	const [ onlineUsers, setOnlineUsers ] = useState({});
 
 	const getUsers = useGetUsers();
 	const logout = useLogout();
 
-	useEffect(
-		() => {
-			getUsers().then((res) => setUsers(res));
-		},
-		[ newUser ]
-	);
+	useEffect(() => {
+		getUsers().then((res) => setUsers(res));
+	}, []);
 
 	useEffect(() => {
 		const socket = socketIOClient(process.env.REACT_APP_API_URL, {
@@ -43,13 +38,15 @@ const Users = (props) => {
 		socket.on('onlineUsers', (data) => {
 			setOnlineUsers(data);
 		});
-		socket.on('users', (data) => {
-			setNewUser(data);
+		socket.on('newUser', (data) => {
+			const newUsers = [ ...users ];
+			newUsers.push(data);
+			setUsers(newUsers);
 		});
 	}, []);
 
 	const handleLogout = async () => {
-		logout(currentUserId).then(
+		logout(authenticationService.currentUserValue._id).then(
 			() => {
 				history.push('/signup');
 				return;

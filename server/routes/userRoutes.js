@@ -5,13 +5,14 @@ const {
     authUser,
     registerUser,
     getUserList,
-    logout
+    logout,
+    verifyAuthorization
 } = require("../controllers/userController")
 const { protect } = require("../middleware/authMiddleware")
 
-router.route("/register").post(registerUser).get(protect);
+router.route("/").post(registerUser).get(protect, getUserList);
+router.route('/authorized').post(verifyAuthorization)
 router.post('/login', authUser)
-router.route('/userlist').get(getUserList)
 router.post('/logout', logout)
 
 

@@ -3,6 +3,7 @@ import { useSnackbar } from 'notistack';
 
 import useHandleResponse from '../utilities/handleResponse';
 
+
 const currentUserSubject = new BehaviorSubject(
     JSON.parse(localStorage.getItem('currentUser'))
 );
@@ -13,6 +14,33 @@ export const authenticationService = {
         return currentUserSubject.value;
     },
 };
+
+export function useVerify() {
+    const { enqueueSnackbar } = useSnackbar();
+
+    const verifyUser = (token) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+        };
+
+        return fetch(
+            `/api/users/authorized`,
+            requestOptions
+        )
+            .then(user => {
+                return user
+            })
+            .catch(function () {
+                enqueueSnackbar('Failed to verify token', {
+                    variant: 'warning',
+                });
+            });
+    }
+    return verifyUser
+}
+
 
 export function useLogin() {
     const { enqueueSnackbar } = useSnackbar();
@@ -57,7 +85,7 @@ export function useRegister() {
         };
 
         return fetch(
-            `/api/users/register`,
+            `/api/users/`,
             requestOptions
         )
             .then(handleResponse)
