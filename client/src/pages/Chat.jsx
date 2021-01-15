@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Users from '../components/Users';
+import ChatBox from '../components/ChatBox';
 import { useVerify } from '../services/authenticationService';
 
 export default function Chat() {
 	const history = useHistory();
 	const verifyUser = useVerify();
+	const [ scope, setScope ] = useState('Global Chat');
+	const [ user, setUser ] = useState(null);
 
 	React.useEffect(
 		() => {
@@ -14,7 +17,7 @@ export default function Chat() {
 				if (user) {
 					const verified = await verifyUser();
 
-					if (verified.ok === false) {
+					if (!verified) {
 						return history.push('/signup');
 					}
 				} else {
@@ -28,7 +31,8 @@ export default function Chat() {
 
 	return (
 		<div>
-			<Users />
+			<Users setUser={setUser} setScope={setScope} />
+			<ChatBox scope={scope} user={user} />
 		</div>
 	);
 }

@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { authenticationService, useLogout } from '../services/authenticationService';
+import { useSearchUsers } from '../services/userService';
 
 const useStyles = makeStyles((theme) => ({
 	list: {
@@ -23,8 +24,10 @@ const Users = (props) => {
 	const history = useHistory();
 	const [ users, setUsers ] = useState([]);
 	const [ onlineUsers, setOnlineUsers ] = useState({});
+	const [ query, setQuery ] = useState('');
 
 	const getUsers = useGetUsers();
+	const searchUsers = useSearchUsers();
 	const logout = useLogout();
 
 	useEffect(() => {
@@ -54,14 +57,43 @@ const Users = (props) => {
 			(error) => {}
 		);
 	};
+
+	const search = async () => {
+		const searchResults = await searchUsers(query);
+		setUsers(searchResults);
+	};
+
+	const handleSearch = (e) => {
+		setQuery(e);
+	};
+
+	useEffect(
+		() => {
+			search();
+		},
+		[ query ]
+	);
+
 	return (
 		<React.Fragment>
 			<Button onClick={handleLogout}>Logout</Button>
+
+			<input type="text" value={query} onChange={(e) => handleSearch(e.target.value)} />
+
 			<List className={classes.list}>
-				{users.length > 0 && (
+				{users &&
+				users.length > 0 && (
 					<React.Fragment>
 						{users.map((u) => (
-							<ListItem className={classes.listItem} key={u._id} button>
+							<ListItem
+								className={classes.listItem}
+								key={u._id}
+								onClick={() => {
+									props.setUser(u);
+									props.setScope(u.username);
+								}}
+								button
+							>
 								<ListItemAvatar className={classes.avatar}>
 									<Avatar>{u.username.slice(0, 2)}</Avatar>
 								</ListItemAvatar>

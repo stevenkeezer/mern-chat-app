@@ -16,10 +16,11 @@ const verifyAuthorization = asyncHandler(async (req, res) => {
     onlineUsers[verified.id] = true
     req.io.sockets.emit("onlineUsers", onlineUsers);
 
+    const currentUserId = verified.id
+    const user = await User.find({ _id: currentUserId })
+
     if (verified) {
-        res.json({
-            verified: true
-        })
+        res.send(user)
     }
 })
 
@@ -58,7 +59,10 @@ const authUser = asyncHandler(async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
         res.json({
-            token: "Bearer " + generateToken(user._id)
+            token: "Bearer " + generateToken(user._id),
+            name: user.name,
+            username: user.username,
+            userId: user._id,
         })
     } else {
         res.status(401)
@@ -101,6 +105,9 @@ const registerUser = asyncHandler(async (req, res) => {
         onlineUsers[user.id] = true
         res.status(201).json({
             token: "Bearer " + generateToken(user._id),
+            name: user.name,
+            username: user.username,
+            userId: user._id,
         });
     } else {
         res.status(400);
@@ -118,4 +125,16 @@ const logout = asyncHandler(async (req, res) => {
     res.json({})
 })
 
-module.exports = { authUser, registerUser, verifyAuthorization, getUserList, logout }
+// @desc   Search for a user
+// @route   POST /api/users/search
+// @access   Private
+const searchUser = asyncHandler(async (req, res) => {
+    const queryString = req.body.query
+    const searchResult = await User.find({ username: { $regex: String(queryString) } })
+
+    if (!searchResult || searchResult.length === 0) res.status(400).send({ error: "No task was found" })
+    res.status(200).send(searchResult)
+})
+
+
+module.exports = { authUser, registerUser, verifyAuthorization, getUserList, searchUser, logout }

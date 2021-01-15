@@ -119,7 +119,7 @@ export default function Login() {
 						onSubmit={({ email, password }, { setStatus, setSubmitting }) => {
 							setStatus();
 							login(email, password).then(
-								() => {
+								(user) => {
 									history.push('/chat');
 									return;
 								},
