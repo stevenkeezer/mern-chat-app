@@ -77,7 +77,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Register() {
 	const classes = useStyles();
-
 	const history = useHistory();
 	const register = useRegister();
 
@@ -128,7 +127,7 @@ export default function Register() {
 									history.push('/chat');
 								},
 								(error) => {
-									console.log('errrer', error);
+									console.log('error', error);
 									setSubmitting(false);
 									setStatus(error);
 								}

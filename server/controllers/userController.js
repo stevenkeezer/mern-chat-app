@@ -13,7 +13,13 @@ const onlineUsers = {};
 const verifyAuthorization = asyncHandler(async (req, res) => {
     const verified = verifyToken(req.headers.authorization)
 
-    onlineUsers[verified.id] = true
+    // onlineUsers[verified.id] = true
+    req.io.sockets.on('connection', function (socket) {
+        if (!onlineUsers[verified.id]) {
+            onlineUsers[verified.id] = socket.id
+        }
+    });
+
     req.io.sockets.emit("onlineUsers", onlineUsers);
 
     const currentUserId = verified.id
@@ -137,4 +143,4 @@ const searchUser = asyncHandler(async (req, res) => {
 })
 
 
-module.exports = { authUser, registerUser, verifyAuthorization, getUserList, searchUser, logout }
+module.exports = { authUser, registerUser, verifyAuthorization, getUserList, searchUser, logout, onlineUsers }

@@ -3,12 +3,16 @@ import { useHistory } from 'react-router-dom';
 import Users from '../components/Users';
 import ChatBox from '../components/ChatBox';
 import { useVerify } from '../services/authenticationService';
+import socketIOClient from 'socket.io-client';
 
 export default function Chat() {
 	const history = useHistory();
 	const verifyUser = useVerify();
 	const [ scope, setScope ] = useState('Global Chat');
 	const [ user, setUser ] = useState(null);
+	const socket = socketIOClient(process.env.REACT_APP_API_URL, {
+		transports: [ 'websocket', 'polling', 'flashsocket' ]
+	});
 
 	React.useEffect(
 		() => {
@@ -31,8 +35,8 @@ export default function Chat() {
 
 	return (
 		<div>
-			<Users setUser={setUser} setScope={setScope} />
-			<ChatBox scope={scope} user={user} />
+			<Users setUser={setUser} setScope={setScope} socket={socket} />
+			<ChatBox scope={scope} user={user} socket={socket} />
 		</div>
 	);
 }

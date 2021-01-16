@@ -5,13 +5,13 @@ const router = express.Router();
 const Message = require('../models/messageModel');
 const Conversation = require('../models/conversationModel');
 const verifyToken = require("../utils/verifyToken")
-
-let jwtUser = null;
+const { onlineUsers } = require('../controllers/userController')
 
 // Token verfication middleware
 router.use(function (req, res, next) {
     try {
-        jwtUser = verifyToken(req.headers.authorization)
+        const jwtUser = verifyToken(req.headers.authorization)
+        req.user = jwtUser;
         next();
     } catch (err) {
         console.log(err);
@@ -25,8 +25,9 @@ router.use(function (req, res, next) {
 // Get messages from conversation
 // based on to & from
 router.get('/conversations/query', (req, res) => {
-    let user1 = mongoose.Types.ObjectId(jwtUser.id);
+    let user1 = mongoose.Types.ObjectId(req.user.id);
     let user2 = mongoose.Types.ObjectId(req.query.userId);
+
     Message.aggregate([
         {
             $lookup: {
@@ -73,7 +74,7 @@ router.get('/conversations/query', (req, res) => {
 
 // Post private message
 router.post('/', (req, res) => {
-    let from = mongoose.Types.ObjectId(jwtUser.id);
+    let from = mongoose.Types.ObjectId(req.user.id);
     let to = mongoose.Types.ObjectId(req.body.to);
 
     Conversation.findOneAndUpdate(
@@ -86,7 +87,7 @@ router.post('/', (req, res) => {
             },
         },
         {
-            recipients: [jwtUser.id, req.body.to],
+            recipients: [req.user.id, req.body.to],
             lastMessage: req.body.body,
             date: Date.now(),
         },
@@ -101,11 +102,13 @@ router.post('/', (req, res) => {
                 let message = new Message({
                     conversation: conversation._id,
                     to: req.body.to,
-                    from: jwtUser.id,
+                    from: req.user.id,
                     body: req.body.body,
                 });
 
-                req.io.sockets.emit('messages', req.body.body);
+                const userFrom = onlineUsers[req.user.id]
+                const userTo = onlineUsers[req.body.to]
+                req.io.sockets.to(userFrom).to(userTo).emit('messages', req.body.body);
 
                 message.save(err => {
                     if (err) {

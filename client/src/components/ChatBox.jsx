@@ -8,7 +8,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import classnames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import socketIOClient from 'socket.io-client';
 import { useVerify } from '../services/authenticationService';
 import { useGetConversationMessages, useSendConversationMessage } from '../services/chatService';
 
@@ -118,10 +117,7 @@ const ChatBox = (props) => {
 	);
 
 	useEffect(() => {
-		const socket = socketIOClient(process.env.REACT_APP_API_URL, {
-			transports: [ 'websocket', 'polling', 'flashsocket' ]
-		});
-		socket.on('messages', (data) => setLastMessage(data));
+		props.socket.on('messages', (data) => setLastMessage(data));
 	}, []);
 
 	const reloadMessages = () => {
@@ -147,6 +143,7 @@ const ChatBox = (props) => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+
 		if (props.scope === 'Global Chat') {
 		} else {
 			sendConversationMessage(props.user._id, newMessage).then((res) => {

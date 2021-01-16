@@ -9,7 +9,7 @@ import { useGetUsers } from '../services/userService';
 import { makeStyles } from '@material-ui/core/styles';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { authenticationService, useLogout } from '../services/authenticationService';
+import { useVerify, useLogout } from '../services/authenticationService';
 import { useSearchUsers } from '../services/userService';
 
 const useStyles = makeStyles((theme) => ({
@@ -19,14 +19,16 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-const Users = (props) => {
+const Users = ({ socket, setUser, setScope }) => {
 	const classes = useStyles();
 	const history = useHistory();
+	const [ currentUserId, setCurrentUserId ] = useState(null);
 	const [ users, setUsers ] = useState([]);
 	const [ onlineUsers, setOnlineUsers ] = useState({});
 	const [ query, setQuery ] = useState('');
 
 	const getUsers = useGetUsers();
+	const verifyUser = useVerify();
 	const searchUsers = useSearchUsers();
 	const logout = useLogout();
 
@@ -35,9 +37,6 @@ const Users = (props) => {
 	}, []);
 
 	useEffect(() => {
-		const socket = socketIOClient(process.env.REACT_APP_API_URL, {
-			transports: [ 'websocket', 'polling', 'flashsocket' ]
-		});
 		socket.on('onlineUsers', (data) => {
 			setOnlineUsers(data);
 		});
@@ -49,7 +48,7 @@ const Users = (props) => {
 	}, []);
 
 	const handleLogout = async () => {
-		logout(authenticationService.currentUserValue._id).then(
+		logout(currentUserId).then(
 			() => {
 				history.push('/signup');
 				return;
@@ -74,10 +73,17 @@ const Users = (props) => {
 		[ query ]
 	);
 
+	useEffect(() => {
+		const currentLoggedInUser = async () => {
+			const curr = await verifyUser();
+			if (curr) setCurrentUserId(curr[0]._id);
+		};
+		currentLoggedInUser();
+	}, []);
+
 	return (
 		<React.Fragment>
 			<Button onClick={handleLogout}>Logout</Button>
-
 			<input type="text" value={query} onChange={(e) => handleSearch(e.target.value)} />
 
 			<List className={classes.list}>
@@ -89,8 +95,8 @@ const Users = (props) => {
 								className={classes.listItem}
 								key={u._id}
 								onClick={() => {
-									props.setUser(u);
-									props.setScope(u.username);
+									setUser(u);
+									setScope(u.username);
 								}}
 								button
 							>

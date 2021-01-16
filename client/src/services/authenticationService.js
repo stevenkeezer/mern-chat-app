@@ -60,7 +60,6 @@ export function useLogin() {
         )
             .then(handleResponse)
             .then(user => {
-                console.log(user, "user")
                 localStorage.setItem('currentUser', JSON.stringify({ "token": user.token }));
                 currentUserSubject.next(user);
                 return user;
