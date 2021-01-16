@@ -26,3 +26,26 @@ export function useGetUsers() {
     return getUsers;
 }
 
+
+export function useSearchUsers() {
+    const handleResponse = useHandleResponse();
+
+    const searchUsers = (query) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: authHeader(),
+            body: JSON.stringify({ query }),
+        };
+
+        return fetch(
+            `/api/users/search`,
+            requestOptions
+        )
+            .then(handleResponse)
+            .catch(err => {
+                console.log(err);
+            });
+    };
+
+    return searchUsers;
+}

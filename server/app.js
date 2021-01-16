@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
-const onlineUsers = require("./controllers/userController")
+const messages = require("./routes/messagesRoutes");
 
 const userRoutes = require("./routes/userRoutes")
 
@@ -25,17 +25,6 @@ const server = app.listen(
 
 const io = require("socket.io")(server);
 
-io.on('connection', function (socket) {
-    console.log('a user connected');
-
-    socket.on('disconnect', function (data) {
-        console.log('user ' + data + ' disconnected');
-        // remove saved socket from users object
-        // console.log(onlineUsers.onlineUsers)
-        // delete users[socket.id];
-    });
-});
-
 app.use(express.json())
 
 // Assign socket object to every request
@@ -45,6 +34,7 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/users', userRoutes)
+app.use("/api/messages", messages);
 
 app.use(notFound)
 app.use(errorHandler)

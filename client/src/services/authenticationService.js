@@ -17,6 +17,7 @@ export const authenticationService = {
 
 export function useVerify() {
     const { enqueueSnackbar } = useSnackbar();
+    const handleResponse = useHandleResponse();
 
     const verifyUser = () => {
         const requestOptions = {
@@ -28,6 +29,7 @@ export function useVerify() {
             `/api/users/authorized`,
             requestOptions
         )
+            .then(handleResponse)
             .then(user => {
                 return user
             })
@@ -58,7 +60,7 @@ export function useLogin() {
         )
             .then(handleResponse)
             .then(user => {
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('currentUser', JSON.stringify({ "token": user.token }));
                 currentUserSubject.next(user);
                 return user;
             })
@@ -89,7 +91,7 @@ export function useRegister() {
         )
             .then(handleResponse)
             .then(user => {
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('currentUser', JSON.stringify({ "token": user.token }));
                 currentUserSubject.next(user);
                 return user;
             })
