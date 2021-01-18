@@ -174,13 +174,14 @@ const Users = ({ socket, setUser, setScope, currentUser }) => {
 								<Avatar
 									className={classes.avatar}
 									style={{
+										fontWeight: 'bold',
 										backgroundColor:
 											'#' +
 											commonUtilities.intToRGB(commonUtilities.hashCode(currentUser.username)),
 										marginRight: 4
 									}}
 								>
-									<Typography>{currentUser.username.slice(0, 2)}</Typography>
+									{currentUser.username.slice(0, 2)}
 								</Avatar>
 							</StyledBadge>
 						</ListItemAvatar>
@@ -232,6 +233,7 @@ const Users = ({ socket, setUser, setScope, currentUser }) => {
 										<Avatar
 											className={classes.avatar}
 											style={{
+												fontWeight: 'bold',
 												backgroundColor:
 													'#' + commonUtilities.intToRGB(commonUtilities.hashCode(u.username))
 											}}
