@@ -1,36 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import List from '@material-ui/core/List';
 import Avatar from '@material-ui/core/Avatar';
-import socketIOClient from 'socket.io-client';
-import { useHistory } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
+import Badge from '@material-ui/core/Badge';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import { useGetUsers } from '../services/userService';
-import { makeStyles } from '@material-ui/core/styles';
-import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { useVerify, useLogout } from '../services/authenticationService';
-import { useSearchUsers } from '../services/userService';
+import ListItemText from '@material-ui/core/ListItemText';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import SearchIcon from '@material-ui/icons/Search';
+import React, { useEffect, useState } from 'react';
+import Dropdown from '../layout/Dropdown';
+import commonUtilities from '../utilities/common';
+import { useGetUsers, useSearchUsers } from '../services/userService';
 
 const useStyles = makeStyles((theme) => ({
+	root: {
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: 'white'
+		},
+		'& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+			border: '1px solid white'
+		}
+	},
+	subheader: {
+		display: 'flex',
+		alignItems: 'center',
+		cursor: 'pointer'
+	},
+	globe: {
+		backgroundColor: theme.palette.primary.dark
+	},
+	subheaderText: {
+		color: theme.palette.primary.dark
+	},
 	list: {
-		maxHeight: 'calc(100vh - 112px)',
-		overflowY: 'auto'
+		overflowY: 'auto',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	box: {
+		paddingLeft: 21,
+		paddingRight: 21
+	},
+	listItem: {
+		height: 80,
+		filter: 'drop-shadow(0px 2px 5px rgba(88,133,196,0.05))',
+		borderRadius: 8
+	},
+	listItemTop: { marginTop: 15, marginBottom: 15 },
+	chatHeader: {
+		fontWeight: 600,
+		paddingBottom: 12
+	},
+	avatar: { width: 44, height: 44, textTransform: 'uppercase' },
+	search: {
+		height: '50px',
+		borderRadius: '5px',
+		marginLeft: 30,
+		marginTop: 10
+	},
+	margin: {
+		paddingBottom: 20
+	},
+	searchHeader: {
+		'& .MuiFilledInput-underline::before': {
+			borderBottom: 'none'
+		},
+		backgroundColor: 'white',
+		top: 0,
+		width: 300,
+		zIndex: 10,
+		marginBottom: 10
+	},
+	searchInput: {
+		height: 50,
+		borderRadius: 8,
+		backgroundColor: '#e9eef9',
+		display: 'flex',
+		paddingLeft: 20,
+		alignItems: 'center'
+	},
+	searchIcon: {
+		color: '#B1C3DF',
+		marginRight: 6
+	},
+	topUserLabel: {
+		marginLeft: 6
+	},
+	bottomUserLabel: {
+		marginLeft: 10
 	}
 }));
 
-const Users = ({ socket, setUser, setScope }) => {
+const StyledBadge = withStyles((theme) => ({
+	badge: {
+		backgroundColor: (props) => props.color,
+		color: (props) => props.color,
+		boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+		'&::after': {
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			width: '100%',
+			height: '100%',
+			borderRadius: '50%',
+			border: '1px solid currentColor',
+			content: '""'
+		}
+	}
+}))(Badge);
+
+const Users = ({ socket, setUser, setScope, currentUser }) => {
 	const classes = useStyles();
-	const history = useHistory();
-	const [ currentUserId, setCurrentUserId ] = useState(null);
 	const [ users, setUsers ] = useState([]);
 	const [ onlineUsers, setOnlineUsers ] = useState({});
 	const [ query, setQuery ] = useState('');
 
 	const getUsers = useGetUsers();
-	const verifyUser = useVerify();
 	const searchUsers = useSearchUsers();
-	const logout = useLogout();
 
 	useEffect(() => {
 		getUsers().then((res) => setUsers(res));
@@ -46,16 +135,6 @@ const Users = ({ socket, setUser, setScope }) => {
 			setUsers(newUsers);
 		});
 	}, []);
-
-	const handleLogout = async () => {
-		logout(currentUserId).then(
-			() => {
-				history.push('/signup');
-				return;
-			},
-			(error) => {}
-		);
-	};
 
 	const search = async () => {
 		const searchResults = await searchUsers(query);
@@ -73,19 +152,59 @@ const Users = ({ socket, setUser, setScope }) => {
 		[ query ]
 	);
 
-	useEffect(() => {
-		const currentLoggedInUser = async () => {
-			const curr = await verifyUser();
-			if (curr) setCurrentUserId(curr[0]._id);
-		};
-		currentLoggedInUser();
-	}, []);
-
 	return (
-		<React.Fragment>
-			<Button onClick={handleLogout}>Logout</Button>
-			<input type="text" value={query} onChange={(e) => handleSearch(e.target.value)} />
+		<div className={classes.box}>
+			<div position="fixed" className={classes.searchHeader}>
+				{currentUser && (
+					<ListItem
+						disableGutters={true}
+						className={(classes.listItem, classes.listItemTop)}
+						key={currentUser._id}
+					>
+						<ListItemAvatar className={classes.avatar}>
+							<StyledBadge
+								overlap="circle"
+								anchorOrigin={{
+									vertical: 'bottom',
+									horizontal: 'right'
+								}}
+								variant="dot"
+								color={'#1CED84'}
+							>
+								<Avatar
+									className={classes.avatar}
+									style={{
+										backgroundColor:
+											'#' +
+											commonUtilities.intToRGB(commonUtilities.hashCode(currentUser.username)),
+										marginRight: 4
+									}}
+								>
+									<Typography>{currentUser.username.slice(0, 2)}</Typography>
+								</Avatar>
+							</StyledBadge>
+						</ListItemAvatar>
+						<ListItemText className={classes.topUserLabel} primary={currentUser.username} />
+						<Dropdown currentUserId={currentUser._id} />
+					</ListItem>
+				)}
 
+				<Typography variant="h6" className={classes.chatHeader}>
+					Chats
+				</Typography>
+				<TextField
+					variant="outlined"
+					fullWidth
+					placeholder="Search..."
+					className={classes.root}
+					InputProps={{
+						className: classes.searchInput,
+						startAdornment: <SearchIcon className={classes.searchIcon} />
+					}}
+					value={query}
+					onChange={(e) => handleSearch(e.target.value)}
+				/>
+			</div>
 			<List className={classes.list}>
 				{users &&
 				users.length > 0 && (
@@ -101,16 +220,33 @@ const Users = ({ socket, setUser, setScope }) => {
 								button
 							>
 								<ListItemAvatar className={classes.avatar}>
-									<Avatar>{u.username.slice(0, 2)}</Avatar>
+									<StyledBadge
+										overlap="circle"
+										anchorOrigin={{
+											vertical: 'bottom',
+											horizontal: 'right'
+										}}
+										variant="dot"
+										color={!onlineUsers[u._id] ? '#D0DAE9' : '#1CED84'}
+									>
+										<Avatar
+											className={classes.avatar}
+											style={{
+												backgroundColor:
+													'#' + commonUtilities.intToRGB(commonUtilities.hashCode(u.username))
+											}}
+										>
+											{u.username.slice(0, 2)}
+										</Avatar>
+									</StyledBadge>
 								</ListItemAvatar>
-								<ListItemText primary={u.username} />
-								<div>{onlineUsers[u._id] && 'online'}</div>
+								<ListItemText primary={u.username} className={classes.bottomUserLabel} />
 							</ListItem>
 						))}
 					</React.Fragment>
 				)}
 			</List>
-		</React.Fragment>
+		</div>
 	);
 };
 

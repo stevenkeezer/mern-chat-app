@@ -21,7 +21,6 @@ router.use(function (req, res, next) {
     }
 });
 
-
 // Get messages from conversation
 // based on to & from
 router.get('/conversations/query', (req, res) => {
@@ -106,9 +105,12 @@ router.post('/', (req, res) => {
                     body: req.body.body,
                 });
 
-                const userFrom = onlineUsers[req.user.id]
-                const userTo = onlineUsers[req.body.to]
-                req.io.sockets.to(userFrom).to(userTo).emit('messages', req.body.body);
+                function getKeyByValue(object, value) {
+                    return Object.keys(object).find(key => object[key] === value);
+                }
+
+                req.io.to(getKeyByValue(req.online, req.user.id)).emit('messages', req.body.body);
+                req.io.to(getKeyByValue(req.online, req.body.to)).emit('messages', req.body.body);
 
                 message.save(err => {
                     if (err) {

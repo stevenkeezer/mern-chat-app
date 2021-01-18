@@ -3,11 +3,11 @@ import { MuiThemeProvider } from "@material-ui/core";
 import { createMuiTheme } from '@material-ui/core/styles';
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
+import socketIOClient from 'socket.io-client';
 
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Chat from "./pages/Chat"
-
 
 import "./App.css";
 
@@ -45,6 +45,9 @@ let theme = createMuiTheme({
 
 function App() {
   const [loggedIn, setLoggedIn] = React.useState(true)
+  const socket = socketIOClient(process.env.REACT_APP_API_URL, {
+    transports: ['websocket', 'polling', 'flashsocket']
+  });
 
   return (
     <MuiThemeProvider theme={theme}>
@@ -55,7 +58,7 @@ function App() {
           </Route>
           <Route path="/signup" component={Signup} />
           <Route path="/login" component={Login} />
-          <Route path="/chat" component={Chat} />
+          <Route path="/chat" component={() => <Chat socket={socket} />} />
         </BrowserRouter>
       </SnackbarProvider>
 
