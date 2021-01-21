@@ -13,13 +13,7 @@ const onlineUsers = {};
 const verifyAuthorization = asyncHandler(async (req, res) => {
     const verified = verifyToken(req.headers.authorization)
 
-    // onlineUsers[verified.id] = true
-    req.io.sockets.on('connection', function (socket) {
-        if (!onlineUsers[verified.id]) {
-            onlineUsers[verified.id] = socket.id
-        }
-    });
-
+    onlineUsers[verified.id] = true
     req.io.sockets.emit("onlineUsers", onlineUsers);
 
     const currentUserId = verified.id

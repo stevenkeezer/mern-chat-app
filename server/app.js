@@ -27,9 +27,26 @@ const io = require("socket.io")(server);
 
 app.use(express.json())
 
+const usersOnline = {};
+
+io.on('connection', function (socket) {
+    socket.on('login', function (data) {
+        // saving userId to object with socket ID
+        usersOnline[socket.id] = data.userId;
+
+        return usersOnline
+    });
+
+    socket.on('disconnect', function () {
+        // remove saved socket from users object
+        delete usersOnline[socket.id];
+    });
+});
+
 // Assign socket object to every request
 app.use(function (req, res, next) {
     req.io = io;
+    req.online = usersOnline
     next();
 });
 

@@ -21,6 +21,72 @@ router.use(function (req, res, next) {
     }
 });
 
+// Get conversations list
+router.get('/conversations', (req, res) => {
+    let from = mongoose.Types.ObjectId(req.user.id);
+    Conversation.aggregate([
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'recipients',
+                foreignField: '_id',
+                as: 'recipientObj',
+            },
+        },
+    ])
+        .match({ recipients: { $all: [{ $elemMatch: { $eq: from } }] } })
+        .project({
+            'recipientObj.password': 0,
+            'recipientObj.__v': 0,
+            'recipientObj.date': 0,
+        })
+        .exec((err, conversations) => {
+            if (err) {
+                console.log(err);
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ message: 'Failure' }));
+                res.sendStatus(500);
+            } else {
+                res.send(conversations);
+            }
+        });
+});
+
+
+// Get messages from conversation
+// based on conversation id
+// router.get('/conversations/query', (req, res) => {
+//     let conversationId = mongoose.Types.ObjectId(req.query.conversationId);
+//     // need user Id, 
+//     console.log(conversationId)
+//     // let user2 = mongoose.Types.ObjectId(req.query.userId);
+
+//     Message.aggregate([{
+//         $lookup: {
+//             from: 'users',
+//             localField: 'conversation',
+//             foreignField: '_id',
+//             as: 'messageObj'
+//         }
+//     }])
+//         .match({ conversation: conversationId })
+//         .project({
+//             'messageObj.password': 0,
+//             'messageObj.__v': 0,
+//             'messageObj.date': 0,
+//         }).exec((err, messages) => {
+//             if (err) {
+//                 console.log(err);
+//                 res.setHeader('Content-Type', 'application/json');
+//                 res.end(JSON.stringify({ message: 'Failure' }));
+//                 res.sendStatus(500);
+//             } else {
+//                 console.log(messages)
+//                 res.send(messages);
+//             }
+//         })
+
+// });
 
 // Get messages from conversation
 // based on to & from
@@ -106,9 +172,13 @@ router.post('/', (req, res) => {
                     body: req.body.body,
                 });
 
-                const userFrom = onlineUsers[req.user.id]
-                const userTo = onlineUsers[req.body.to]
-                req.io.sockets.to(userFrom).to(userTo).emit('messages', req.body.body);
+                function getKeyByValue(object, value) {
+                    return Object.keys(object).find(key => object[key] === value);
+                }
+                console.log('endpoint hit', req.online, req.user.id)
+
+                req.io.to(getKeyByValue(req.online, req.user.id)).emit('messages', req.body.body);
+                req.io.to(getKeyByValue(req.online, req.body.to)).emit('messages', req.body.body);
 
                 message.save(err => {
                     if (err) {

@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
@@ -6,16 +7,23 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import commonUtilities from '../utilities/common';
+import Moment from 'react-moment';
+
 import classnames from 'classnames';
-import React, { useEffect, useRef, useState } from 'react';
-import { useVerify } from '../services/authenticationService';
 import { useGetConversationMessages, useSendConversationMessage } from '../services/chatService';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		height: '100vh',
-		'& .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'white'
+		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+			borderColor: theme.palette.background.default
+		},
+		'& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+			border: '1px solid white'
 		}
 	},
 	headerRow: {
@@ -32,51 +40,65 @@ const useStyles = makeStyles((theme) => ({
 		boxShadow: 'none'
 	},
 	messageContainer: {
+		height: '100%',
 		display: 'flex',
 		alignContent: 'flex-end'
 	},
 	messagesRow: {
-		overflowY: 'auto'
-	},
-	newMessageRow: {
-		width: '100%',
-		padding: theme.spacing(0, 2, 1)
+		overflowY: 'auto',
+		paddingLeft: 30,
+		paddingRight: 30,
+		[theme.breakpoints.up('sm')]: {
+			paddingLeft: 50
+		}
 	},
 	messageBubble: {
 		flex: '0 1 auto',
 		padding: 10,
+		paddingLeft: 20,
+		paddingRight: 20,
 		border: '1px solid white',
 		color: theme.palette.primary.light,
-		backgroundImage: 'linear-gradient(225deg, #6cc1ff 0%, #3a8dff 100%)',
+		backgroundImage: `linear-gradient(225deg, #6cc1ff 0%, ${theme.palette.primary.main} 100%)`,
 		borderRadius: '0 10px 10px 10px',
 		marginTop: 8,
 		maxWidth: '40em',
-		color: 'white'
+		color: theme.palette.background.default
 	},
 	messageBubbleRight: {
-		borderRadius: '10px 0 10px 10px',
-		backgroundColor: '#f4f6fa',
+		backgroundColor: theme.palette.message.bubble,
 		backgroundImage: 'none',
 		color: '#91a3c0',
 		fontWeight: 600,
-		borderRadius: '10px 10px 0 10px',
-		maxWidth: '60%'
+		borderRadius: '10px 10px 0 10px'
 	},
+	messageLabel: { color: '#BECCE2' },
 	inputRow: {
-		background: 'white',
+		background: theme.palette.background.default,
+		paddingBottom: 35,
 		position: 'fixed',
 		bottom: 0,
-		right: 0,
-		padding: 20,
-		left: 342
-		// [theme.breakpoints.up('xs')]: {}
+		paddingLeft: 45,
+		paddingRight: 45,
+		width: '100%',
+		[theme.breakpoints.up('sm')]: {
+			width: 'calc(100% - 340px)',
+			paddingLeft: 75
+		}
 	},
+	recordIcon: { marginRight: 12 },
 	form: {
 		width: '100%'
 	},
 	avatar: {
 		margin: theme.spacing(1, 1.5),
 		minWidth: 0
+	},
+	avatarCircle: {
+		height: 30,
+		width: 30,
+		fontSize: 13,
+		textTransform: 'uppercase'
 	},
 	listItem: {
 		display: 'flex',
@@ -88,19 +110,30 @@ const useStyles = makeStyles((theme) => ({
 	messageInput: {
 		height: 70,
 		borderRadius: 8,
-		backgroundColor: '#F4F6FA',
+		backgroundColor: theme.palette.message.bubble,
 		display: 'flex',
 		paddingLeft: 20,
 		alignItems: 'center'
+	},
+	userLabel: { marginRight: 5 },
+	messageIcons: {
+		display: 'flex',
+		color: '#D1D9E6',
+		marginRight: 10
+	},
+	spacerBottom: {
+		height: 120
+	},
+	emptyHeader: {
+		marginTop: 30,
+		marginBottom: 20
 	}
 }));
 
 const ChatBox = (props) => {
-	const [ currentUserId, setCurrentUserId ] = useState(null);
 	const [ newMessage, setNewMessage ] = useState('');
 	const [ messages, setMessages ] = useState([]);
 	const [ lastMessage, setLastMessage ] = useState(null);
-	const verifyUser = useVerify();
 
 	const getConversationMessages = useGetConversationMessages();
 	const sendConversationMessage = useSendConversationMessage();
@@ -117,7 +150,9 @@ const ChatBox = (props) => {
 	);
 
 	useEffect(() => {
-		props.socket.on('messages', (data) => setLastMessage(data));
+		props.socket.on('messages', (data) => {
+			setLastMessage(data);
+		});
 	}, []);
 
 	const reloadMessages = () => {
@@ -143,51 +178,93 @@ const ChatBox = (props) => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-
 		if (props.scope === 'Global Chat') {
-		} else {
+		} else if (newMessage !== '') {
 			sendConversationMessage(props.user._id, newMessage).then((res) => {
 				setNewMessage('');
 			});
 		}
 	};
-	useEffect(() => {
-		const currentLoggedInUser = async () => {
-			const curr = await verifyUser();
-			if (curr) setCurrentUserId(curr[0]._id);
-		};
-		currentLoggedInUser();
-	}, []);
 
 	return (
 		<Grid container className={classes.root}>
 			<Grid item xs={12}>
 				<Grid container className={classes.messageContainer}>
+					{props.scope === 'Global Chat' && (
+						<Grid
+							container
+							spacing={0}
+							direction="column"
+							alignItems="center"
+							justify="center"
+							style={{ minHeight: '100vh', paddingTop: 100 }}
+						>
+							<Grid item>
+								<img src="/Images/emptyImg.svg" />
+							</Grid>
+							<Typography variant="h4" className={classes.emptyHeader}>
+								Welcome to Sigmal
+							</Typography>
+							<Typography variant="h6">Select a friend or contact to start chatting.</Typography>
+						</Grid>
+					)}
 					<Grid item xs={12} className={classes.messagesRow}>
-						<div style={{ height: 30 }} />
 						{messages.length > 0 && (
 							<List>
 								{messages.map((m) => (
 									<ListItem
 										key={m._id}
 										className={classnames(classes.listItem, {
-											[`${classes.listItemRight}`]: m.fromObj[0]._id === currentUserId
+											[`${classes.listItemRight}`]: m.fromObj[0]._id === props.currentUser._id
 										})}
 										alignItems="flex-start"
 									>
-										<ListItemAvatar className={classes.avatar}>
-											<Avatar>{m.fromObj[0].name}</Avatar>
-										</ListItemAvatar>
-										<p>{m.fromObj[0]._id !== currentUserId && m.fromObj[0].username}</p>
-										<ListItemText
-											classes={{
-												root: classnames(classes.messageBubble, {
-													[`${classes.messageBubbleRight}`]:
-														m.fromObj[0]._id === currentUserId
-												})
-											}}
-											primary={<React.Fragment>{m.body}</React.Fragment>}
-										/>
+										{m.fromObj[0]._id !== props.currentUser._id && (
+											<ListItemAvatar className={classes.avatar}>
+												<Avatar
+													className={classes.avatarCircle}
+													style={{
+														backgroundColor:
+															'#' +
+															commonUtilities.intToRGB(
+																commonUtilities.hashCode(m.fromObj[0].username)
+															)
+													}}
+												>
+													{m.fromObj[0].username.slice(0, 2)}
+												</Avatar>
+											</ListItemAvatar>
+										)}
+
+										<div>
+											<Typography variant="caption" className={classes.messageLabel}>
+												<span
+													style={{
+														display: 'flex',
+														justifyContent:
+															m.fromObj[0]._id === props.currentUser._id && 'flex-end'
+													}}
+												>
+													{m.fromObj[0]._id !== props.currentUser._id && (
+														<span className={classes.userLabel}>
+															{m.fromObj[0].username}
+														</span>
+													)}
+													<Moment format="h:mm" unix>
+														{Number(m.date) / 1000}
+													</Moment>
+												</span>
+											</Typography>
+											<ListItemText
+												classes={{
+													root: classnames(classes.messageBubble, {
+														[`${classes.messageBubbleRight}`]:
+															m.fromObj[0]._id === props.currentUser._id
+													})
+												}}
+												primary={<React.Fragment>{m.body}</React.Fragment>}
+											/>
+										</div>
 									</ListItem>
 								))}
 							</List>
@@ -195,27 +272,30 @@ const ChatBox = (props) => {
 						<div ref={chatBottom} />
 					</Grid>
 				</Grid>
-				<div style={{ height: 120 }} />
+				<div className={classes.spacerBottom} />
 			</Grid>
 			{props.scope !== 'Global Chat' && (
 				<Grid item xs={12} className={classes.inputRow}>
 					<form onSubmit={handleSubmit} className={classes.form}>
-						<Grid container className={classes.newMessageRow} alignItems="flex-end">
-							<Grid item xs={12}>
-								<TextField
-									id="message"
-									placeholder="Type something..."
-									variant="outlined"
-									fullWidth
-									value={newMessage}
-									InputProps={{
-										className: classes.messageInput,
-										disableunderline: true
-									}}
-									onChange={(e) => setNewMessage(e.target.value)}
-								/>
-							</Grid>
-						</Grid>
+						<TextField
+							id="message"
+							placeholder="Type something..."
+							variant="outlined"
+							fullWidth
+							value={newMessage}
+							autoComplete="off"
+							InputProps={{
+								className: classes.messageInput,
+								disableunderline: 'true',
+								endAdornment: (
+									<div className={classes.messageIcons}>
+										<FiberManualRecordIcon className={classes.recordIcon} />
+										<FileCopyIcon />
+									</div>
+								)
+							}}
+							onChange={(e) => setNewMessage(e.target.value)}
+						/>
 					</form>
 				</Grid>
 			)}

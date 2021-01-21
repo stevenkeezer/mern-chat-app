@@ -28,8 +28,6 @@ export function useGetConversations() {
     return getConversations;
 }
 
-// get conversation messages based on
-// to and from id's
 export function useGetConversationMessages() {
     const { enqueueSnackbar } = useSnackbar();
     const handleResponse = useHandleResponse();
