@@ -1,8 +1,3 @@
-import React from 'react';
-
-export default function EmptyState() {
-	return (
-		<div>
 			<svg
 				id="b97da3e5-0e47-4f78-a23b-a0e68331254e"
 				data-name="Layer 1"
@@ -123,6 +118,3 @@ export default function EmptyState() {
 				<ellipse cx="554.64354" cy="605.66091" rx="24.50394" ry="2.71961" fill="#f2f2f2" />
 				<ellipse cx="335.64354" cy="285.66091" rx="24.50394" ry="2.71961" fill="#f2f2f2" />
 			</svg>
-		</div>
-	);
-}

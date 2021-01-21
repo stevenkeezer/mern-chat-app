@@ -16,7 +16,7 @@ import { useGetUsers, useSearchUsers } from '../services/userService';
 const useStyles = makeStyles((theme) => ({
 	root: {
 		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'white'
+			borderColor: theme.palette.background.default
 		},
 		'& .Mui-focused .MuiOutlinedInput-notchedOutline': {
 			border: '1px solid white'
@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
 		'& .MuiFilledInput-underline::before': {
 			borderBottom: 'none'
 		},
-		backgroundColor: 'white',
+		backgroundColor: theme.palette.background.default,
 		top: 0,
 		width: 300,
 		zIndex: 10,

@@ -12,46 +12,19 @@ import Authorization from '../layout/Authorization';
 import { useRegister } from '../services/authenticationService';
 
 const useStyles = makeStyles((theme) => ({
-	welcome: {
-		paddingBottom: 20,
-		color: '#000000',
-		fontWeight: 500
-	},
-	buttonHeader: {
-		display: 'flex',
-		alignItems: 'flex-start',
-		justifyContent: 'space-between',
-		flexDirection: 'column',
-		bgcolor: 'background.paper',
-		minHeight: '100vh',
-		paddingTop: 23
-	},
+	buttonHeader: theme.buttonHeader,
+	noAccBtn: theme.noAccBtn,
+	welcome: theme.welcome,
+	box: theme.box,
 	accBtn: {
 		width: 170,
 		height: 54,
 		borderRadius: 5,
 		filter: 'drop-shadow(0px 2px 6px rgba(74,106,149,0.2))',
-		backgroundColor: '#ffffff',
-		color: '#3a8dff',
+		backgroundColor: theme.palette.background.default,
+		color: theme.palette.primary.main,
 		boxShadow: 'none',
 		marginRight: 35
-	},
-	noAccBtn: {
-		color: '#b0b0b0',
-		fontWeight: 400,
-		textAlign: 'center',
-		marginRight: 21,
-		whiteSpace: 'nowrap'
-	},
-	box: {
-		padding: 24,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		minHeight: '100vh',
-		flexDirection: 'column',
-		maxWidth: 900,
-		margin: 'auto'
 	},
 	form: {
 		width: '100%', // Fix IE 11 issue.

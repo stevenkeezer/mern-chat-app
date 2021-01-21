@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
 			borderRight: 'none'
 		},
 		'& .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'white'
+			borderColor: theme.palette.background.default
 		},
 		display: 'flex',
 		borderRight: 'none'
@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 		height: 89,
 		display: 'flex',
 		justifyContent: 'center',
-		backgroundColor: 'white',
+		backgroundColor: theme.palette.background.default,
 		color: 'black',
 		filter: 'drop-shadow(0px 2px 10px rgba(88,133,196,0.1))',
 		boxShadow: 'none',
@@ -85,12 +85,11 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-function ResponsiveDrawer(props) {
-	const { window } = props;
+function ResponsiveDrawer({ setScope, socket, setUser, user, scope, mobileOpen, setMobileOpen }) {
+	const { window } = { setScope, socket, setUser, user, scope, mobileOpen, setMobileOpen };
 	const classes = useStyles();
 	const theme = useTheme();
 
-	const [ mobileOpen, setMobileOpen ] = useState(false);
 	const [ onlineUsers, setOnlineUsers ] = useState({});
 	const [ currentUser, setCurrentUser ] = useState(null);
 
@@ -102,24 +101,31 @@ function ResponsiveDrawer(props) {
 
 	useEffect(
 		() => {
-			props.socket.on('onlineUsers', (data) => {
+			socket.on('onlineUsers', (data) => {
 				setOnlineUsers(data);
 			});
 		},
-		[ props.socket ]
+		[ socket ]
 	);
 
 	useEffect(() => {
 		const currentLoggedInUser = async () => {
 			const curr = await verifyUser();
 			if (curr) setCurrentUser(curr[0]);
+			console.log(curr[0], 'curr');
 		};
 		currentLoggedInUser();
 	}, []);
 
 	const drawer = (
 		<div>
-			<Users setScope={props.setScope} socket={props.socket} setUser={props.setUser} currentUser={currentUser} />
+			<Users
+				setScope={setScope}
+				socket={socket}
+				setUser={setUser}
+				currentUser={currentUser}
+				onlineUsers={onlineUsers}
+			/>
 		</div>
 	);
 
@@ -142,10 +148,10 @@ function ResponsiveDrawer(props) {
 						</IconButton>
 
 						<Typography color="inherit" variant="h6">
-							{props.scope !== 'Global Chat' && (
+							{scope !== 'Global Chat' && (
 								<div style={{ display: 'flex', alignItems: 'baseline' }}>
-									<span>{props.scope}</span>
-									{onlineUsers[props.user._id] && (
+									<span>{scope}</span>
+									{onlineUsers[user._id] && (
 										<div className={classes.topBarContent}>
 											<div className={classes.onlineIcon} />
 											<Typography variant="caption" className={classes.onlineLabel}>
@@ -192,7 +198,7 @@ function ResponsiveDrawer(props) {
 				</nav>
 				<main className={classes.content}>
 					<div className={classes.toolbar} />
-					<Chatbox scope={props.scope} user={props.user} socket={props.socket} currentUser={currentUser} />
+					<Chatbox scope={scope} user={user} socket={socket} currentUser={currentUser} />
 					<div className={classes.toolbar} />
 				</main>
 			</div>

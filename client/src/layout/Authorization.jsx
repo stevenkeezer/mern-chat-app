@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	heroText: {
 		textAlign: 'center',
-		color: 'white',
+		color: theme.palette.background.default,
 		marginTop: 30,
 		maxWidth: 300
 	},

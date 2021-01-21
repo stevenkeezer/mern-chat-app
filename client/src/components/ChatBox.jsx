@@ -11,7 +11,6 @@ import Typography from '@material-ui/core/Typography';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import commonUtilities from '../utilities/common';
-import EmptyState from '../layout/EmptyState';
 import Moment from 'react-moment';
 
 import classnames from 'classnames';
@@ -21,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 	root: {
 		height: '100vh',
 		'& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-			borderColor: 'white'
+			borderColor: theme.palette.background.default
 		},
 		'& .Mui-focused .MuiOutlinedInput-notchedOutline': {
 			border: '1px solid white'
@@ -60,14 +59,14 @@ const useStyles = makeStyles((theme) => ({
 		paddingRight: 20,
 		border: '1px solid white',
 		color: theme.palette.primary.light,
-		backgroundImage: 'linear-gradient(225deg, #6cc1ff 0%, #3a8dff 100%)',
+		backgroundImage: `linear-gradient(225deg, #6cc1ff 0%, ${theme.palette.primary.main} 100%)`,
 		borderRadius: '0 10px 10px 10px',
 		marginTop: 8,
 		maxWidth: '40em',
-		color: 'white'
+		color: theme.palette.background.default
 	},
 	messageBubbleRight: {
-		backgroundColor: '#f4f6fa',
+		backgroundColor: theme.palette.message.bubble,
 		backgroundImage: 'none',
 		color: '#91a3c0',
 		fontWeight: 600,
@@ -75,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	messageLabel: { color: '#BECCE2' },
 	inputRow: {
-		background: 'white',
+		background: theme.palette.background.default,
 		paddingBottom: 35,
 		position: 'fixed',
 		bottom: 0,
@@ -111,7 +110,7 @@ const useStyles = makeStyles((theme) => ({
 	messageInput: {
 		height: 70,
 		borderRadius: 8,
-		backgroundColor: '#F4F6FA',
+		backgroundColor: theme.palette.message.bubble,
 		display: 'flex',
 		paddingLeft: 20,
 		alignItems: 'center'
@@ -201,7 +200,7 @@ const ChatBox = (props) => {
 							style={{ minHeight: '100vh', paddingTop: 100 }}
 						>
 							<Grid item>
-								<EmptyState />
+								<img src="/Images/emptyImg.svg" />
 							</Grid>
 							<Typography variant="h4" className={classes.emptyHeader}>
 								Welcome to Sigmal

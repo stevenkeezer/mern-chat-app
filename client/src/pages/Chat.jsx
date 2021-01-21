@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import Drawer from '../layout/Drawer';
 import { useVerify } from '../services/authenticationService';
@@ -6,6 +6,8 @@ import { useVerify } from '../services/authenticationService';
 export default function Chat({ socket }) {
 	const history = useHistory();
 	const verifyUser = useVerify();
+
+	const [ mobileOpen, setMobileOpen ] = useState(false);
 	const [ scope, setScope ] = useState('Global Chat');
 	const [ user, setUser ] = useState(null);
 
@@ -15,8 +17,9 @@ export default function Chat({ socket }) {
 			async function verifiedToken() {
 				if (user) {
 					const verified = await verifyUser();
-					socket.emit('login', { userId: verified[0]._id });
-
+					if (verified) {
+						socket.emit('login', { userId: verified[0]._id });
+					}
 					if (!verified) {
 						return history.push('/signup');
 					}
@@ -29,5 +32,15 @@ export default function Chat({ socket }) {
 		[ history, verifyUser ]
 	);
 
-	return <Drawer scope={scope} setScope={setScope} user={user} setUser={setUser} socket={socket} />;
+	return (
+		<Drawer
+			scope={scope}
+			setScope={setScope}
+			user={user}
+			setUser={setUser}
+			socket={socket}
+			mobileOpen={mobileOpen}
+			setMobileOpen={setMobileOpen}
+		/>
+	);
 }

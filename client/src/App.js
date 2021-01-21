@@ -24,6 +24,9 @@ let theme = createMuiTheme({
       dark: '#c17900',
       contrastText: '#212121',
     },
+    message: {
+      bubble: "#f4f6fa"
+    },
     background: {
       default: '#ffffff',
     },
@@ -39,6 +42,37 @@ let theme = createMuiTheme({
     subtitle1: {
       fontSize: 19
     }
+  },
+  buttonHeader: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexDirection: 'column',
+    bgcolor: 'background.paper',
+    minHeight: '100vh',
+    paddingTop: 23
+  },
+  box: {
+    padding: 24,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    flexDirection: 'column',
+    maxWidth: 900,
+    margin: 'auto'
+  },
+  noAccBtn: {
+    color: '#b0b0b0',
+    fontWeight: 400,
+    textAlign: 'center',
+    marginRight: 21,
+    whiteSpace: 'nowrap'
+  },
+  welcome: {
+    paddingBottom: 20,
+    color: '#000000',
+    fontWeight: 500
   }
 });
 
